@@ -1,4 +1,4 @@
-# $Id: XPath.pm,v 1.8 2004/12/18 10:13:47 mrodrigu Exp $
+# $Id: XPath.pm,v 1.9 2005/02/24 12:35:31 mrodrigu Exp $
 
 package XML::DOM::XPath;
 
@@ -8,7 +8,7 @@ use XML::XPath;
 use XML::DOM;
 
 use vars qw($VERSION);
-$VERSION="0.07";
+$VERSION="0.08";
 
 my $xp_field;     # the field in the document that contains the XML::XPath object
 my $parent_field; # the field in an attribute that contains the parent element
@@ -65,6 +65,8 @@ sub findvalue           { my( $node, $path)= @_; return $node->xp->findvalue(   
 sub exists              { my( $node, $path)= @_; return $node->xp->exists(              $path, $node); }
 sub find                { my( $node, $path)= @_; return $node->xp->find(                $path, $node); }
 sub matches             { my( $node, $path)= @_; return $node->xp->matches( $node->getOwnerDocument, $path, $node); }
+
+sub to_number { return XML::XPath::Number->new( shift->string_value); }
 
 sub getParent   { return $_[0]->getParentNode; }
 sub getRootNode { return $_[0]->getOwnerDocument; }
@@ -221,6 +223,7 @@ sub getParent
 
 sub string_value
   { return $_[0]->getValue; }
+
 
 sub inherit_att
   { return $_[0]->getParent->inherit_att( @_); }
