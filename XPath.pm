@@ -1,4 +1,4 @@
-# $Id: XPath.pm,v 1.7 2004/07/21 12:21:31 mrodrigu Exp $
+# $Id: XPath.pm,v 1.8 2004/12/18 10:13:47 mrodrigu Exp $
 
 package XML::DOM::XPath;
 
@@ -8,7 +8,7 @@ use XML::XPath;
 use XML::DOM;
 
 use vars qw($VERSION);
-$VERSION="0.06";
+$VERSION="0.07";
 
 my $xp_field;     # the field in the document that contains the XML::XPath object
 my $parent_field; # the field in an attribute that contains the parent element
@@ -30,25 +30,6 @@ BEGIN
     }
 }
 
-package XML::DOM::Parser;
-
-{ no warnings;
-    
-sub parse
-  { my $parser= shift;
-    my $dom= $parser->SUPER::parse( @_);
-    $dom->[$xp_field]= XML::XPath->new();
-    return $dom;
-  }
-sub parsefile
-  { my $parser= shift;
-    my $dom= $parser->SUPER::parsefile( @_);
-    $dom->[$xp_field]= XML::XPath->new();
-    return $dom;
-  }
-}
-  
-
 package XML::DOM::Document;
 
 sub findnodes           { my( $dom, $path)= @_; return $dom->xp->findnodes(           $path, $dom); }
@@ -61,6 +42,20 @@ sub set_namespace       { my $dom= shift; $dom->xp->set_namespace( @_); }
 
 sub getRootNode { return $_[0]; }
 sub xp { return $_[0]->[$xp_field] }
+
+{ no warnings;
+  # copied from the original DOM packege, with the addition of the creation of the XML::XPath object
+  sub new
+    { my ($class) = @_;
+      my $self = bless [], $class;
+
+      # keep Doc pointer, even though getOwnerDocument returns undef
+      $self->[_Doc] = $self;
+      $self->[_C] = new XML::DOM::NodeList;
+      $self->[$xp_field]= XML::XPath->new();
+      $self;
+    }
+}
 
 package XML::DOM::Node;
 

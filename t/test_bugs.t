@@ -1,10 +1,10 @@
 #!/usr/bin/perl -w
 use strict;
 
-# $Id: test_bugs.t,v 1.1 2004/07/21 12:21:31 mrodrigu Exp $
+# $Id: test_bugs.t,v 1.2 2004/12/18 10:13:47 mrodrigu Exp $
 
 
-use Test::More tests => 4;
+use Test::More tests => 5;
 
 use XML::DOM::XPath;
 ok(1, "use XML::DOM::XPath");
@@ -26,4 +26,12 @@ my $parser= XML::DOM::Parser->new;
 my $xml= "<doc>foo</doc>\n";
 my $dom= $parser->parse( $xml);
 is( $dom->toString, $xml, "toString on a whole document");
+}
+
+# RT #8977 : could not call XPath methods on an XML::DOM::Document before the parse
+# because new did not create the xp object attached to the XML::DOM::Document
+{ my $xml = new XML::DOM::Document;
+  my $root = $xml->createElement('root');
+  $xml->appendChild($root);
+  ok( $xml->exists('root'), "can call XPath methods on an XML::DOM::Document before the parse");
 }
