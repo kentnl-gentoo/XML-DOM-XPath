@@ -1,10 +1,10 @@
 #!/usr/bin/perl -w
 use strict;
 
-# $Id: test_bugs.t,v 1.5 2005/03/02 10:02:52 mrodrigu Exp $
+# $Id: test_bugs.t,v 1.6 2005/03/08 09:08:42 mrodrigu Exp $
 
 
-use Test::More tests => 10;
+use Test::More tests => 9;
 
 use XML::DOM::XPath;
 ok(1, "use XML::DOM::XPath");
@@ -60,7 +60,6 @@ is( $dom->toString, $xml, "toString on a whole document");
     else
       { is( $prices, 'e1e3', "using number comparison on elements"); }
 
-    is( $prices, 'e1e3', "using number comparison on elements");
     $prices= $doc->findvalue('/d/e[f<2.5]/@id');
     is( $prices, 'e1e3e4', "using number comparison on elements");
     is( $doc->findvalue('/d/e[@nb>=2]/@id'), 'e2e3e4e5e6', "using number comparison on attributes");

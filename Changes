@@ -1,6 +1,10 @@
 Revision history for Perl extension XML::DOM::XPath.
 
-$Id: Changes,v 1.6 2005/03/02 09:53:25 mrodrigu Exp $
+$Id: Changes,v 1.7 2005/03/07 08:37:56 mrodrigu Exp $
+
+0.09
+  - allow XML::XPath to be also used (the sort method checks
+    on which type of object it is called), fixes bug RT 11772
 
 0.08
   - fixed a bug with XPath expressions using numerical comparison

@@ -1,4 +1,4 @@
-# $Id: XPath.pm,v 1.9 2005/02/24 12:35:31 mrodrigu Exp $
+# $Id: XPath.pm,v 1.10 2005/03/07 08:37:56 mrodrigu Exp $
 
 package XML::DOM::XPath;
 
@@ -8,7 +8,7 @@ use XML::XPath;
 use XML::DOM;
 
 use vars qw($VERSION);
-$VERSION="0.08";
+$VERSION="0.09";
 
 my $xp_field;     # the field in the document that contains the XML::XPath object
 my $parent_field; # the field in an attribute that contains the parent element
@@ -22,10 +22,19 @@ BEGIN
 BEGIN
 { package XML::XPath::NodeSet;
   no warnings; # to avoid the "Subroutine sort redefined" message
-  # replace the native sort routine by a custom one
+  # replace the native sort routine by a custom one, at least when called from XML::DOM::XPath
   sub sort 
     { my $self = CORE::shift;
-      @$self = CORE::sort { $a->cmp( $b) } @$self;
+      return $self if( @$self <=1);
+      eval { $self->[0]->get_global_pos; }; # check if get_global_pos works (can does not work here)
+      if($@) 
+        { # get_global_pos not available: use XML::DOM::XPath specific sort
+          @$self = CORE::sort { $a->cmp( $b) } @$self;
+        }
+      else
+        { # get_global_pos available: use the original sort
+            @$self = CORE::sort { $a->get_global_pos <=> $b->get_global_pos } @$self;
+        }
       return $self;
     }
 }
