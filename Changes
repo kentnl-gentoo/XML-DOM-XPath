@@ -1,0 +1,8 @@
+Revision history for Perl extension XML::DOM::XPath.
+
+$Id: Changes,v 1.1.1.1 2003/12/04 20:40:43 mrodrigu Exp $
+
+0.01  Thu Dec  4 14:53:15 2003
+	- original version; created by h2xs 1.22 with options
+		-A -X -nXML::DOM::XPath --use-new-tests --skip-exporter --skip-autoloader
+
