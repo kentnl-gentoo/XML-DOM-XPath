@@ -8,15 +8,15 @@ use XML::XPath;
 use XML::DOM;
 
 use vars qw($VERSION);
-$VERSION="0.05";
+$VERSION="0.06";
 
 my $xp_field;     # the field in the document that contains the XML::XPath object
 my $parent_field; # the field in an attribute that contains the parent element
 
 BEGIN 
   { # this is probably quite wrong, I have to figure out the internal structure of nodes better
-    $xp_field     = 10; 
-    $parent_field = 11;
+    $xp_field     = 11; 
+    $parent_field = 12;
   }
 
 BEGIN
@@ -71,7 +71,7 @@ sub exists              { my( $node, $path)= @_; return $node->xp->exists(      
 sub find                { my( $node, $path)= @_; return $node->xp->find(                $path, $node); }
 sub matches             { my( $node, $path)= @_; return $node->xp->matches( $node->getOwnerDocument, $path, $node); }
 
-sub getParent { return $_[0]->getParentNode; }
+sub getParent   { return $_[0]->getParentNode; }
 sub getRootNode { return $_[0]->getOwnerDocument; }
 
 sub xp { return $_[0]->getOwnerDocument->xp; }
