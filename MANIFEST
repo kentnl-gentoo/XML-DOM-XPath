@@ -4,6 +4,7 @@ MANIFEST
 README
 XPath.pm
 t/1.t
+t/test_bugs.t
 t/xmlxpath_01basic.t
 t/xmlxpath_02descendant.t
 t/xmlxpath_03star.t

@@ -1,3 +1,5 @@
+# $Id: XPath.pm,v 1.7 2004/07/21 12:21:31 mrodrigu Exp $
+
 package XML::DOM::XPath;
 
 use strict;
@@ -6,22 +8,21 @@ use XML::XPath;
 use XML::DOM;
 
 use vars qw($VERSION);
-$VERSION="0.02";
+$VERSION="0.05";
 
 my $xp_field;     # the field in the document that contains the XML::XPath object
 my $parent_field; # the field in an attribute that contains the parent element
 
-#BEGIN { $xp_field= 'XML::DOM::XPath::Parser::xp'; }
 BEGIN 
   { # this is probably quite wrong, I have to figure out the internal structure of nodes better
-		$xp_field     = 10; 
-		$parent_field = 11;
+    $xp_field     = 10; 
+    $parent_field = 11;
   }
 
 BEGIN
 { package XML::XPath::NodeSet;
   no warnings; # to avoid the "Subroutine sort redefined" message
-	# replace the native sort routine by a custom one
+  # replace the native sort routine by a custom one
   sub sort 
     { my $self = CORE::shift;
       @$self = CORE::sort { $a->cmp( $b) } @$self;
@@ -32,21 +33,21 @@ BEGIN
 package XML::DOM::Parser;
 
 { no warnings;
-		
+    
 sub parse
   { my $parser= shift;
-	  my $dom= $parser->SUPER::parse( @_);
+    my $dom= $parser->SUPER::parse( @_);
     $dom->[$xp_field]= XML::XPath->new();
-		return $dom;
-	}
+    return $dom;
+  }
 sub parsefile
   { my $parser= shift;
-	  my $dom= $parser->SUPER::parsefile( @_);
+    my $dom= $parser->SUPER::parsefile( @_);
     $dom->[$xp_field]= XML::XPath->new();
-		return $dom;
-	}
+    return $dom;
+  }
 }
-	
+  
 
 package XML::DOM::Document;
 
@@ -58,7 +59,6 @@ sub find                { my( $dom, $path)= @_; return $dom->xp->find(          
 sub matches             { my( $dom, $path)= @_; return $dom->xp->matches( $dom, $path, $dom); }
 sub set_namespace       { my $dom= shift; $dom->xp->set_namespace( @_); }
 
-#*getRootNode= *getDocumentElement;
 sub getRootNode { return $_[0]; }
 sub xp { return $_[0]->[$xp_field] }
 
@@ -84,12 +84,12 @@ sub cmp
     return -1 if( $a->isAncestor($b)); # a starts before b 
     return  1 if( $b->isAncestor($a)); # a starts after b
 
-		# special case for 2 attributes of the same element
-		# order is dictionary order of the attribute names
-		if( $a->isa( 'XML::DOM::Attr') && $b->isa( 'XML::DOM::Attr')
-				&& ($a->getParent == $b->getParent)
+    # special case for 2 attributes of the same element
+    # order is dictionary order of the attribute names
+    if( $a->isa( 'XML::DOM::Attr') && $b->isa( 'XML::DOM::Attr')
+        && ($a->getParent == $b->getParent)
       )
-			{ return $a->getName cmp $b->getName }
+      { return $a->getName cmp $b->getName }
 
     # ancestors does not include the element itself
     my @a_pile= ($a->ancestors_or_self); 
@@ -123,19 +123,19 @@ sub cmp
 
 sub ancestors_or_self
   { my $node= shift;
-		my @ancestors= ($node);
-		while( $node= $node->getParent)
-		  { push @ancestors, $node; }
-		return @ancestors;
+    my @ancestors= ($node);
+    while( $node= $node->getParent)
+      { push @ancestors, $node; }
+    return @ancestors;
   }
 
 sub getNamespace
   { my $node= shift;
-	  my $prefix= shift() || $node->ns_prefix;
-		if( my $expanded= $node->get_namespace( $prefix))
-		  { return XML::DOM::Namespace->new( $prefix, $expanded); }
-		else
-		  { return XML::DOM::Namespace->new( $prefix, ''); }
+    my $prefix= shift() || $node->ns_prefix;
+    if( my $expanded= $node->get_namespace( $prefix))
+      { return XML::DOM::Namespace->new( $prefix, $expanded); }
+    else
+      { return XML::DOM::Namespace->new( $prefix, ''); }
   }
 
 sub getLocalName
@@ -162,8 +162,8 @@ BEGIN
         my $prefix= defined $_[0] ? shift() : $node->ns_prefix;
         if( $prefix eq "#default") { $prefix=''}
         my $ns_att= $prefix ? "xmlns:$prefix" : "xmlns";
-				my $expanded= $DEFAULT_NS{$prefix} || $node->inherit_att( $ns_att) || '';
-				return $expanded;
+        my $expanded= $DEFAULT_NS{$prefix} || $node->inherit_att( $ns_att) || '';
+        return $expanded;
       }
   }
 
@@ -177,7 +177,7 @@ sub inherit_att
       } while( $node= $node->getParentNode);
     return undef;
   }
-	
+  
 package XML::DOM::Element;
 
 sub getName { return $_[0]->getTagName; }
@@ -187,17 +187,20 @@ sub getName { return $_[0]->getTagName; }
 # this method exists in XML::DOM but it returns a NamedNodeMap object
 # XML::XPath needs it, but wants an array... bother!
 sub getAttributes
-  { unless( caller(0)=~ m{^XML::XPath})
+  { # in any case we need $_[0]->[_A]  to be filled
+    $_[0]->[_A] ||= XML::DOM::NamedNodeMap->new (Doc  => $_[0]->[_Doc], Parent  => $_[0]);
+
+    unless( caller(0)=~ m{^XML::XPath})
       { # the original XML::DOM value
-        return $_[0]->[_A] ||= XML::DOM::NamedNodeMap->new (Doc	=> $_[0]->[_Doc], Parent	=> $_[0]); 
-		  }
-		else
-		  { # this is what XML::XPath needs
-				my $elt= shift;
-				my @atts= grep { ref $_ eq 'XML::DOM::Attr' } values %{$elt->[1]};
-				$_->[$parent_field]= $elt foreach (@atts);
+        return $_[0]->[_A]; 
+      }
+    else
+      { # this is what XML::XPath needs
+        my $elt= shift;
+        my @atts= grep { ref $_ eq 'XML::DOM::Attr' } values %{$elt->[1]};
+        $_->[$parent_field]= $elt foreach (@atts);
         return wantarray ? @atts : \@atts;
-			}
+      }
   }
 
 }
@@ -206,17 +209,15 @@ sub getAttributes
 sub string_value
   { my $self = shift;
     my $string = '';
-    foreach my $kid ($self->getChildNodes) {
-        if ($kid->getNodeType == ELEMENT_NODE
-                || $kid->getNodeType == TEXT_NODE) {
-            $string .= $kid->string_value;
-        }
-    }
+    foreach my $kid ($self->getChildNodes) 
+      { if ($kid->getNodeType == ELEMENT_NODE || $kid->getNodeType == TEXT_NODE) 
+          { $string .= $kid->string_value; }
+      }
     return $string;
   }
 
 
-	
+  
 package XML::DOM::Attr;
 
 # needed for the sort
@@ -237,8 +238,8 @@ package XML::DOM::Namespace;
 
 sub new
   { my( $class, $prefix, $expanded)= @_;
-		bless { prefix => $prefix, expanded => $expanded }, $class;
-	}
+    bless { prefix => $prefix, expanded => $expanded }, $class;
+  }
 
 sub isNamespaceNode { 1; }
 
@@ -254,6 +255,7 @@ __END__
 =head1 NAME
 
 XML::DOM::XPath - Perl extension to add XPath support to XML::DOM, using XML::XPath engine
+
 =head1 SYNOPSIS
 
   use XML::DOM::XPath;
@@ -262,9 +264,9 @@ XML::DOM::XPath - Perl extension to add XPath support to XML::DOM, using XML::XP
   my $doc = $parser->parsefile ("file.xml");
 
   # print all HREF attributes of all CODEBASE elements
-	# compare with the XML::DOM version to see how much easier it is to use
+  # compare with the XML::DOM version to see how much easier it is to use
   my @nodes = $doc->findnodes( '//CODEBASE[@HREF]/@HREF');
-	print $_->getValue, "\n" foreach (@nodes);
+  print $_->getValue, "\n" foreach (@nodes);
 
 =head1 DESCRIPTION
 
@@ -275,8 +277,7 @@ It lets you use all of the XML::DOM methods.
 
 =head1 METHODS
 
-Those methods can be applied to a whole dom object or to a node, in which
-case .
+Those methods can be applied to a whole dom object or to a node.
 
 =head2 findnodes($path)
 
@@ -303,7 +304,8 @@ return true if the node matches the path.
 =head1 SEE ALSO
 
   XML::DOM
-	XML::XPath
+
+  XML::XPath
 
 =head1 AUTHOR
 

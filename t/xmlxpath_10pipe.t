@@ -1,6 +1,5 @@
-# $Id: xmlxpath_10pipe.t,v 1.1.1.1 2003/12/04 20:40:43 mrodrigu Exp $
+# $Id: xmlxpath_10pipe.t,v 1.2 2004/07/21 12:21:31 mrodrigu Exp $
 
-use Test;
 use Test;
 plan( tests => 6);
 use XML::DOM::XPath;
