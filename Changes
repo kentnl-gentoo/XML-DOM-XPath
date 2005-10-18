@@ -1,6 +1,9 @@
 Revision history for Perl extension XML::DOM::XPath.
 
-$Id: Changes,v 1.7 2005/03/07 08:37:56 mrodrigu Exp $
+$Id: Changes,v 1.8 2005/10/18 08:39:04 mrodrigu Exp $
+
+0.10
+  - added pod tests and tests with utf-8 characters
 
 0.09
   - allow XML::XPath to be also used (the sort method checks

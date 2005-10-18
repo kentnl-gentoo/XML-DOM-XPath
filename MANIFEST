@@ -35,4 +35,8 @@ t/xmlxpath_28ancestor2.t
 t/xmlxpath_29desc_with_predicate.t
 t/xmlxpath_30lang.t
 t/test_xml_xpath_and_xml_dom_xpath.t
+t/pod.t
+t/pod_coverage.t
+t/test_non_ascii.t
+t/non_ascii.xml
 META.yml                                Module meta-data (added by MakeMaker)

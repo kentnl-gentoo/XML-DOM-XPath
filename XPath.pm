@@ -1,4 +1,4 @@
-# $Id: XPath.pm,v 1.10 2005/03/07 08:37:56 mrodrigu Exp $
+# $Id: XPath.pm,v 1.11 2005/10/18 08:39:04 mrodrigu Exp $
 
 package XML::DOM::XPath;
 
@@ -8,7 +8,7 @@ use XML::XPath;
 use XML::DOM;
 
 use vars qw($VERSION);
-$VERSION="0.09";
+$VERSION="0.10";
 
 my $xp_field;     # the field in the document that contains the XML::XPath object
 my $parent_field; # the field in an attribute that contains the parent element
