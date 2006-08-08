@@ -4,7 +4,7 @@ use strict;
 # $Id: test_bugs.t,v 1.6 2005/03/08 09:08:42 mrodrigu Exp $
 
 
-use Test::More tests => 9;
+use Test::More tests => 13;
 
 use XML::DOM::XPath;
 ok(1, "use XML::DOM::XPath");
@@ -64,5 +64,31 @@ is( $dom->toString, $xml, "toString on a whole document");
     is( $prices, 'e1e3e4', "using number comparison on elements");
     is( $doc->findvalue('/d/e[@nb>=2]/@id'), 'e2e3e4e5e6', "using number comparison on attributes");
     my @nodes= $doc->findnodes( '/d/e/@id');
+}
+
+{ #RT 20884: //@* dies (needed getAttributes on XML::DOM::Document node type)
+  my $res= XML::DOM::Parser->new
+                          ->parse('<root a="e0"><element1 att="e1"/><element2 att="e3" aa="e2"/></root>')
+                          ->findvalue('//@*');
+  is( $res, 'e0e1e2e3', '//@*');
+}
+{ #RT 20884: //comment() dies (missing is<Type>Node methods)
+  my $doc= XML::DOM::Parser->new
+                          ->parse('<root><!--c1--><?t1 d1?><!--c2--><?t2 d2?><?t1 d3?></root>');
+  is( $doc->findvalue( '//comment()'), 'c1c2', '//comment()');
+  is( $doc->findvalue( '//processing-instruction("t1")'), 'd1d3', '//processing-instruction( "t1")');
+
+  # bug in XML::XPath
+  my $pis= $doc->findvalue( '//processing-instruction()');
+    if( $pis eq '')
+      { warn "  warning: the version of XPath you are using has a bug in the way it\n",
+             "  handles the processing-instruction() selector'.\n",
+             "  if an XML::XPath version with a fix for the bug is not yet available,\n",
+             "  you can get a patched version: http://xmltwig.com/xml-xpath-patched/\n",
+             ;
+        ok( 1, "testing '//processing-instruction()' (XPath bug found)"); 
+      }
+    else
+      { is( $doc->findvalue( '//processing-instruction()'), 'd1d2d3', '//processing-instruction()'); }
 }
 

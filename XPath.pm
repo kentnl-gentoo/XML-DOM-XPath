@@ -8,7 +8,7 @@ use XML::XPath;
 use XML::DOM;
 
 use vars qw($VERSION);
-$VERSION="0.10";
+$VERSION="0.11";
 
 my $xp_field;     # the field in the document that contains the XML::XPath object
 my $parent_field; # the field in an attribute that contains the parent element
@@ -75,12 +75,26 @@ sub exists              { my( $node, $path)= @_; return $node->xp->exists(      
 sub find                { my( $node, $path)= @_; return $node->xp->find(                $path, $node); }
 sub matches             { my( $node, $path)= @_; return $node->xp->matches( $node->getOwnerDocument, $path, $node); }
 
+sub isCommentNode { 0 };
+sub isPINode      { 0 };
+
 sub to_number { return XML::XPath::Number->new( shift->string_value); }
 
 sub getParent   { return $_[0]->getParentNode; }
 sub getRootNode { return $_[0]->getOwnerDocument; }
 
 sub xp { return $_[0]->getOwnerDocument->xp; }
+
+# this method exists in XML::DOM but it returns undef, while 
+# XML::XPath needs it, but wants an array... bother!
+# This method is actually redefined for XML::DOM::Element, but needs
+# to be here for other types of nodes.
+{ no warnings;
+  sub getAttributes
+    { if( caller(0)!~ m{^XML::XPath}) { return undef; }                                    # XML::DOM
+      else                            { my @atts= (); return wantarray ? @atts : \@atts; } # XML::XPath
+    }
+}
 
 sub cmp
   { my( $a, $b)=@_;
@@ -196,7 +210,7 @@ sub getAttributes
   { # in any case we need $_[0]->[_A]  to be filled
     $_[0]->[_A] ||= XML::DOM::NamedNodeMap->new (Doc  => $_[0]->[_Doc], Parent  => $_[0]);
 
-    unless( caller(0)=~ m{^XML::XPath})
+    if( caller(0)!~ m{^XML::XPath}) 
       { # the original XML::DOM value
         return $_[0]->[_A]; 
       }
@@ -227,19 +241,29 @@ sub string_value
 package XML::DOM::Attr;
 
 # needed for the sort
-sub getParent
-  { return $_[0]->[$parent_field]; }
+sub inherit_att { return $_[0]->getParent->inherit_att( @_); }
 
-sub string_value
-  { return $_[0]->getValue; }
+sub getParent    { return $_[0]->[$parent_field]; }
+sub string_value { return $_[0]->getValue; }
+sub getData      { return $_[0]->getValue; }
 
-
-sub inherit_att
-  { return $_[0]->getParent->inherit_att( @_); }
 
 package XML::DOM::Text;
-sub string_value
-  { return $_[0]->getData; }
+sub string_value { return $_[0]->getData; }
+
+
+package XML::DOM::Comment;
+sub isCommentNode { 1 };
+sub string_value { return $_[0]->getData; }
+
+
+package XML::DOM::ProcessingInstruction;
+
+sub isPINode { 1 };
+sub isProcessingInstructionNode { 1 };
+sub string_value { return $_[0]->getData; }
+sub value { return $_[0]->getData; }
+
 
 package XML::DOM::Namespace;
 

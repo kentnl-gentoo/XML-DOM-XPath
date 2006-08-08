@@ -2,6 +2,11 @@ Revision history for Perl extension XML::DOM::XPath.
 
 $Id: Changes,v 1.8 2005/10/18 08:39:04 mrodrigu Exp $
 
+0.11
+
+  - fixed bugs when using a query with //@*, or with
+    //comment(), spotted by Ben Hsing (RT #20884). 
+
 0.10
   - added pod tests and tests with utf-8 characters
 
