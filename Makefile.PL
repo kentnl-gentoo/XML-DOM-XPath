@@ -6,7 +6,7 @@ use ExtUtils::MakeMaker;
 WriteMakefile(
     NAME              => 'XML::DOM::XPath',
     VERSION_FROM      => 'XPath.pm', # finds $VERSION
-    PREREQ_PM         => { XML::DOM => 0, XML::XPath => 0 }, # e.g., Module::Name => 1.1
+    PREREQ_PM         => { XML::DOM => 0, XML::XPathEngine => 0.04 }, # e.g., Module::Name => 1.1
     ($] >= 5.005 ?     ## Add these new keywords supported since 5.005
       (ABSTRACT_FROM  => 'XPath.pm', # retrieve abstract from module
        AUTHOR         => 'Michel Rodriguez <mirod@cpan.org>') : ()),

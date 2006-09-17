@@ -4,13 +4,13 @@ package XML::DOM::XPath;
 
 use strict;
 
-use XML::XPath;
+use XML::XPathEngine;
 use XML::DOM;
 
 use vars qw($VERSION);
-$VERSION="0.11";
+$VERSION="0.12";
 
-my $xp_field;     # the field in the document that contains the XML::XPath object
+my $xp_field;     # the field in the document that contains the XML::XPathEngine object
 my $parent_field; # the field in an attribute that contains the parent element
 
 BEGIN 
@@ -18,26 +18,6 @@ BEGIN
     $xp_field     = 11; 
     $parent_field = 12;
   }
-
-BEGIN
-{ package XML::XPath::NodeSet;
-  no warnings; # to avoid the "Subroutine sort redefined" message
-  # replace the native sort routine by a custom one, at least when called from XML::DOM::XPath
-  sub sort 
-    { my $self = CORE::shift;
-      return $self if( @$self <=1);
-      eval { $self->[0]->get_global_pos; }; # check if get_global_pos works (can does not work here)
-      if($@) 
-        { # get_global_pos not available: use XML::DOM::XPath specific sort
-          @$self = CORE::sort { $a->cmp( $b) } @$self;
-        }
-      else
-        { # get_global_pos available: use the original sort
-            @$self = CORE::sort { $a->get_global_pos <=> $b->get_global_pos } @$self;
-        }
-      return $self;
-    }
-}
 
 package XML::DOM::Document;
 
@@ -49,11 +29,13 @@ sub find                { my( $dom, $path)= @_; return $dom->xp->find(          
 sub matches             { my( $dom, $path)= @_; return $dom->xp->matches( $dom, $path, $dom); }
 sub set_namespace       { my $dom= shift; $dom->xp->set_namespace( @_); }
 
+sub cmp { return $_[1]->isa( 'XML::DOM::Document') ? 0 : 1; }
+
 sub getRootNode { return $_[0]; }
 sub xp { return $_[0]->[$xp_field] }
 
 { no warnings;
-  # copied from the original DOM packege, with the addition of the creation of the XML::XPath object
+  # copied from the original DOM package, with the addition of the creation of the XML::XPathEngine object
   sub new
     { my ($class) = @_;
       my $self = bless [], $class;
@@ -61,7 +43,7 @@ sub xp { return $_[0]->[$xp_field] }
       # keep Doc pointer, even though getOwnerDocument returns undef
       $self->[_Doc] = $self;
       $self->[_C] = new XML::DOM::NodeList;
-      $self->[$xp_field]= XML::XPath->new();
+      $self->[$xp_field]= XML::XPathEngine->new();
       $self;
     }
 }
@@ -78,7 +60,7 @@ sub matches             { my( $node, $path)= @_; return $node->xp->matches( $nod
 sub isCommentNode { 0 };
 sub isPINode      { 0 };
 
-sub to_number { return XML::XPath::Number->new( shift->string_value); }
+sub to_number { return XML::XPathEngine::Number->new( shift->string_value); }
 
 sub getParent   { return $_[0]->getParentNode; }
 sub getRootNode { return $_[0]->getOwnerDocument; }
@@ -86,13 +68,13 @@ sub getRootNode { return $_[0]->getOwnerDocument; }
 sub xp { return $_[0]->getOwnerDocument->xp; }
 
 # this method exists in XML::DOM but it returns undef, while 
-# XML::XPath needs it, but wants an array... bother!
+# XML::XPathEngine needs it, but wants an array... bother!
 # This method is actually redefined for XML::DOM::Element, but needs
 # to be here for other types of nodes.
 { no warnings;
   sub getAttributes
-    { if( caller(0)!~ m{^XML::XPath}) { return undef; }                                    # XML::DOM
-      else                            { my @atts= (); return wantarray ? @atts : \@atts; } # XML::XPath
+    { if( caller(0)!~ m{^XML::XPathEngine}) { return undef; }                                    # XML::DOM
+      else                                  { my @atts= (); return wantarray ? @atts : \@atts; } # XML::XPathEngine
     }
 }
 
@@ -106,10 +88,12 @@ sub cmp
 
     # special case for 2 attributes of the same element
     # order is dictionary order of the attribute names
-    if( $a->isa( 'XML::DOM::Attr') && $b->isa( 'XML::DOM::Attr')
-        && ($a->getParent == $b->getParent)
-      )
-      { return $a->getName cmp $b->getName }
+    if( $a->isa( 'XML::DOM::Attr') && $b->isa( 'XML::DOM::Attr'))
+      { if( $a->getParent == $b->getParent)
+          { return $a->getName cmp $b->getName }
+        else
+          { return $a->getParent->cmp( $b->getParent); }
+      }
 
     # ancestors does not include the element itself
     my @a_pile= ($a->ancestors_or_self); 
@@ -205,17 +189,17 @@ sub getName { return $_[0]->getTagName; }
 { no warnings;
 
 # this method exists in XML::DOM but it returns a NamedNodeMap object
-# XML::XPath needs it, but wants an array... bother!
+# XML::XPathEngine needs it, but wants an array... bother!
 sub getAttributes
   { # in any case we need $_[0]->[_A]  to be filled
     $_[0]->[_A] ||= XML::DOM::NamedNodeMap->new (Doc  => $_[0]->[_Doc], Parent  => $_[0]);
 
-    if( caller(0)!~ m{^XML::XPath}) 
+    if( caller(0)!~ m{^XML::XPathEngine}) 
       { # the original XML::DOM value
         return $_[0]->[_A]; 
       }
     else
-      { # this is what XML::XPath needs
+      { # this is what XML::XPathEngine needs
         my $elt= shift;
         my @atts= grep { ref $_ eq 'XML::DOM::Attr' } values %{$elt->[1]};
         $_->[$parent_field]= $elt foreach (@atts);
@@ -225,7 +209,7 @@ sub getAttributes
 
 }
 
-# nearly straight from XML::XPath
+# nearly straight from XML::XPathEngine
 sub string_value
   { my $self = shift;
     my $string = '';
@@ -336,7 +320,7 @@ return true if the node matches the path.
 
   XML::DOM
 
-  XML::XPath
+  XML::XPathEngine
 
 =head1 AUTHOR
 

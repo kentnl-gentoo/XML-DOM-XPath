@@ -2,6 +2,14 @@ Revision history for Perl extension XML::DOM::XPath.
 
 $Id: Changes,v 1.8 2005/10/18 08:39:04 mrodrigu Exp $
 
+0.12
+
+  - changed dependency from XML::XPath (which does not
+    seem to be actively maintained) to XML::XPathEngine 
+    (which I maintain)
+
+  - fixed bug in sorting attributes
+
 0.11
 
   - fixed bugs when using a query with //@*, or with
