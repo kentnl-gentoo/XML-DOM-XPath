@@ -8,7 +8,7 @@ use XML::XPathEngine;
 use XML::DOM;
 
 use vars qw($VERSION);
-$VERSION="0.12";
+$VERSION="0.13";
 
 my $xp_field;     # the field in the document that contains the XML::XPathEngine object
 my $parent_field; # the field in an attribute that contains the parent element

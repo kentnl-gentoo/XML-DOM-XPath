@@ -5,8 +5,11 @@ use strict;
 
 
 use Test::More tests => 1;
-use XML::DOM::XPath; 
-use XML::XPath;
+use XML::DOM::XPath;
+
+unless(eval{require XML::XPath}) { ok(1); exit; }
+
+import XML::XPath; 
 
 my $xml = <<EOF;
 <?xml version="1.0" encoding="UTF-8"?>

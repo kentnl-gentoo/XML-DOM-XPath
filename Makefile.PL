@@ -11,3 +11,4 @@ WriteMakefile(
       (ABSTRACT_FROM  => 'XPath.pm', # retrieve abstract from module
        AUTHOR         => 'Michel Rodriguez <mirod@cpan.org>') : ()),
 );
+

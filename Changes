@@ -2,6 +2,11 @@ Revision history for Perl extension XML::DOM::XPath.
 
 $Id: Changes,v 1.8 2005/10/18 08:39:04 mrodrigu Exp $
 
+0.13
+
+  - removed dependency on XML::XPath in tests (spotted by
+    Sendu Bala)
+
 0.12
 
   - changed dependency from XML::XPath (which does not
