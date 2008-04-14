@@ -2,10 +2,22 @@ Revision history for Perl extension XML::DOM::XPath.
 
 $Id: Changes,v 1.8 2005/10/18 08:39:04 mrodrigu Exp $
 
+0.14
+  - upgraded dependency to XML::XPathEngine 1.10
+  - added the findnodes_as_strings method, that returns a list of 
+    strings, one for each matching node 
+  - fixed RT #29423, test failing on Debian
+    see http://rt.cpan.org/Ticket/Display.html?id=29423
+  - added tests for bugs fixed in XML::XPathEngine 1.10
+
 0.13
 
   - removed dependency on XML::XPath in tests (spotted by
     Sendu Bala)
+
+  - added warning for test failure due to using XML::Parser
+    and XML::DOM from a previous version of perl, compiled
+    with different options (spotted by Tony Awtrey)
 
 0.12
 

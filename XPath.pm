@@ -8,7 +8,7 @@ use XML::XPathEngine;
 use XML::DOM;
 
 use vars qw($VERSION);
-$VERSION="0.13";
+$VERSION="0.14";
 
 my $xp_field;     # the field in the document that contains the XML::XPathEngine object
 my $parent_field; # the field in an attribute that contains the parent element
@@ -21,13 +21,14 @@ BEGIN
 
 package XML::DOM::Document;
 
-sub findnodes           { my( $dom, $path)= @_; return $dom->xp->findnodes(           $path, $dom); }
-sub findnodes_as_string { my( $dom, $path)= @_; return $dom->xp->findnodes_as_string( $path, $dom); }
-sub findvalue           { my( $dom, $path)= @_; return $dom->xp->findvalue(           $path, $dom); }
-sub exists              { my( $dom, $path)= @_; return $dom->xp->exists(              $path, $dom); }
-sub find                { my( $dom, $path)= @_; return $dom->xp->find(                $path, $dom); }
-sub matches             { my( $dom, $path)= @_; return $dom->xp->matches( $dom, $path, $dom); }
-sub set_namespace       { my $dom= shift; $dom->xp->set_namespace( @_); }
+sub findnodes            { my( $dom, $path)= @_; return $dom->xp->findnodes(            $path, $dom); }
+sub findnodes_as_string  { my( $dom, $path)= @_; return $dom->xp->findnodes_as_string(  $path, $dom); }
+sub findnodes_as_strings { my( $dom, $path)= @_; return $dom->xp->findnodes_as_strings( $path, $dom); }
+sub findvalue            { my( $dom, $path)= @_; return $dom->xp->findvalue(            $path, $dom); }
+sub exists               { my( $dom, $path)= @_; return $dom->xp->exists(               $path, $dom); }
+sub find                 { my( $dom, $path)= @_; return $dom->xp->find(                 $path, $dom); }
+sub matches              { my( $dom, $path)= @_; return $dom->xp->matches( $dom, $path, $dom); }
+sub set_namespace        { my $dom= shift; $dom->xp->set_namespace( @_); }
 
 sub cmp { return $_[1]->isa( 'XML::DOM::Document') ? 0 : 1; }
 

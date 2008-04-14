@@ -2,7 +2,7 @@
 use strict;
 
 use Test;
-plan( tests => 12);
+plan( tests => 15);
 use XML::DOM::XPath;
 ok(1);
 
@@ -28,8 +28,12 @@ ok( @nodes, 2);
 $node= $t->findvalue( '//*[@attr:findme]');
 ok( $node, 'attr content');
 
-# Set namespace mappings.
+ok( $t->findvalue('//attr:node/@attr:findme'), 'someval');
 
+ok( $t->findvalue( '//toto'), 'tata');
+ok( $t->findvalue( '//toto/@att'), 'tutu');
+
+# Set namespace mappings.
 
 $t->set_namespace("foo" => "flubber.example.com");
 $t->set_namespace("goo" => "foobar.example.com");

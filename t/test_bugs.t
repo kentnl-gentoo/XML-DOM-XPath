@@ -4,7 +4,7 @@ use strict;
 # $Id: test_bugs.t,v 1.6 2005/03/08 09:08:42 mrodrigu Exp $
 
 
-use Test::More tests => 13;
+use Test::More tests => 21;
 
 use XML::DOM::XPath;
 ok(1, "use XML::DOM::XPath");
@@ -92,3 +92,58 @@ is( $dom->toString, $xml, "toString on a whole document");
       { is( $doc->findvalue( '//processing-instruction()'), 'd1d2d3', '//processing-instruction()'); }
 }
 
+{
+my $xml=qq|<?xml version="1.0" encoding="utf-8"?>
+<cdl><structure><assessments>
+<component type="labtasks" name="Lab Tasks" id="labtasks"    weight="40"/>
+<component type="exam"       name="Mid Term Exam"    id="midterm" weight="20"/>
+<component type="exam"       name="End Term Exam"  id="endterm" weight="40"/>
+</assessments></structure></cdl>
+|;
+
+
+  my $xp = XML::DOM::Parser->new->parsestring($xml);
+
+  is( $xp->findvalue( 'count( //component)'), 3, 'count on its own');
+  is( 2 * $xp->findvalue( 'count( //component)'), 6, '2 * count');
+  is( $xp->findvalue( 'count( //component)') * 2, 6, 'count * 2');
+
+  {
+    my $component= ($xp->findnodes ('//structure//assessments/component'))[0]; 
+    my $id = $component->findvalue ('@id');
+    my $weight= $component->findvalue ('@weight');
+    my $res=  100 * $weight;	# this is where things failed
+    is( $res, 4000, 'findvalue result used in an multiplication');
+  }
+
+  {
+    my $weight=($xp->findnodes_as_strings ('//structure//assessments/component/@weight'))[0]; 
+    my $res= 100 * $weight;	# this is where things failed
+    is( $res, 4000, 'findvalue result used in an multiplication');
+  }
+}
+
+{
+  my $xml=qq|
+<text>
+  <para>I start the text here, I break
+the line and I go on, I <blink>twinkle</blink> and then I go on
+    again. 
+This is not a new paragraph.</para><para>This is a
+    <important>new</important> paragraph and 
+    <blink>this word</blink> has a preceding sibling.</para>
+</text>
+|;
+
+  my $xp = XML::DOM::Parser->new->parsestring( $xml);
+  ok($xp);
+
+  # Debian bug #187583, http://bugs.debian.org/187583
+  # Check that evaluation doesn't lose the context information
+
+  my $nodes = $xp->find("text/para/node()[position()=last() and preceding-sibling::important]");
+  ok("$nodes", " has a preceding sibling.");
+
+  $nodes = $xp->find("text/para/node()[preceding-sibling::important and position()=last()]");
+  ok("$nodes", " has a preceding sibling.");
+}
