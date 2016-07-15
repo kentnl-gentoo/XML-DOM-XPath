@@ -7,7 +7,7 @@ use strict;
 use Test::More tests => 10;
 use XML::DOM::XPath;
 
-use encoding 'utf8';
+use utf8;
 
 my $display_warning=0;
 
